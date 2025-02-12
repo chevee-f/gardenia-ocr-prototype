@@ -7,5 +7,10 @@ apt-get update && apt-get install -y \
     libtesseract-dev \
     poppler-utils
 
+which tesseract
+which pdftotext
+which pdftoppm
+
 # Install Python dependencies
 pip install -r requirements.txt
+echo $PATH
