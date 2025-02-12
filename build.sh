@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-echo $PATH
 
 pip install --upgrade pip
 pip install --force-reinstall gunicorn
@@ -12,3 +11,6 @@ apt-get update && apt-get install -y \
 
 # Install Python dependencies
 pip install -r requirements.txt
+echo "--echoing path START--"
+echo $PATH
+echo "--echoing path END--"
