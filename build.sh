@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export PATH=$PATH:/usr/local/python3/bin
+export PATH=$PATH:/usr/local/python3.9.19/bin
 export PATH="/opt/render/project/poetry/bin:$PATH"
 pip install --upgrade pip
 pip install git+https://github.com/benoitc/gunicorn.git
