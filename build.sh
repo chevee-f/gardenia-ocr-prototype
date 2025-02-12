@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-
+export PATH=$PATH:/usr/local/python3/bin
+export PATH="/opt/render/project/poetry/bin:$PATH"
 pip install --upgrade pip
-pip install --force-reinstall gunicorn
+pip install git+https://github.com/benoitc/gunicorn.git
 
 # Install system dependencies
 apt-get update && apt-get install -y \
