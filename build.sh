@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+pip install --force-reinstall gunicorn
 
 # Install system dependencies
 apt-get update && apt-get install -y \
