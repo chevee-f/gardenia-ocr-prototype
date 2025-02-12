@@ -11,6 +11,9 @@ which tesseract
 which pdftotext
 which pdftoppm
 
+echo "--echoing path START--"
+echo $PATH
+echo "--echoing path END--"
+
 # Install Python dependencies
 pip install -r requirements.txt
-echo $PATH
