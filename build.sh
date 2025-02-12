@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+echo $PATH
+
+pip install --upgrade pip
 pip install --force-reinstall gunicorn
 
 # Install system dependencies
