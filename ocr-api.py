@@ -58,6 +58,7 @@ def crop_image(image, crop_region):
 
 def extract_text_from_pdf(pdf_path, crop_region):
     # poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    print "extracting"
     print("/app/poppler-24.08.0/Library/bin")
     print(r"/app/poppler-24.08.0/Library/bin")
     images = convert_from_path(pdf_path, dpi=300, poppler_path=r"/app/poppler-24.08.0/Library/bin")
@@ -73,13 +74,18 @@ def extract_text_from_pdf(pdf_path, crop_region):
 @app.route('/extract-text', methods=['POST'])
 def extract_text():
     try:
+        print "im here"
         file = request.files['pdf']
         crop_region = json.loads(request.args.get('crop_region'))
+        
+        print "i have the file"
         if not file or not crop_region:
             return jsonify({"error": "PDF file and crop_region are required"}), 400
         
         temp_pdf_path = "temp.pdf"
         file.save(temp_pdf_path)
+        
+        print "i have the pdf path"
         
         extracted_text = extract_text_from_pdf(temp_pdf_path, crop_region)
         
