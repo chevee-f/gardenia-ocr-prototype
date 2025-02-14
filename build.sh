@@ -11,6 +11,10 @@ which tesseract
 which pdftotext
 which pdftoppm
 
+echo "=========================installing poppler-utils"
+
+apt-get install poppler-utils
+
 echo "--echoing path START--"
 echo $PATH
 echo "--echoing path END--"
