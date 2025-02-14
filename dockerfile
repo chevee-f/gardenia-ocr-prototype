@@ -1,8 +1,8 @@
 FROM python:3.9-slim
 
 # Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PATH="$PATH:/app/poppler-24.08.0/Library/bin"
+# ENV PYTHONUNBUFFERED=1 \
+    # PATH="$PATH:/app/poppler-24.08.0/Library/bin"
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
