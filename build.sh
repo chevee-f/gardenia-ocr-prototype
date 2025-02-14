@@ -15,10 +15,6 @@ echo "=========================installing poppler-utils"
 
 apt-get install poppler-utils
 
-echo "--echoing path START--"
-echo $PATH
-echo "--echoing path END--"
-
 ls
 
 echo "--------------------"
@@ -26,6 +22,11 @@ echo "--------------------"
 pwd 
 
 export PATH="$PATH:/opt/render/project/src/poppler-24.08.0/Library/bin"
+
+
+echo "--echoing path START--"
+echo $PATH
+echo "--echoing path END--"
 
 # Install Python dependencies
 pip install -r requirements.txt
