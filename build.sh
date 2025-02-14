@@ -25,5 +25,7 @@ echo "--------------------"
 
 pwd 
 
+export PATH="$PATH:/opt/render/project/src/poppler-24.08.0/Library/bin"
+
 # Install Python dependencies
 pip install -r requirements.txt
