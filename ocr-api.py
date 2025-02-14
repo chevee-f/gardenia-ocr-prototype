@@ -5,6 +5,7 @@ import pytesseract
 from PIL import Image, ImageFilter, ImageOps
 import json
 from flask_cors import CORS
+import subprocess
 
 
 app = Flask(__name__)
@@ -15,6 +16,27 @@ CORS(app)
 # if os.name == "nt":  # Windows
 pytesseract.pytesseract.tesseract_cmd = r".\Tesseract-OCR\tesseract.exe"
 poppler_path = r"\app\poppler-24.08.0\Library\bin"
+
+# Add poppler to PATH
+poppler_path = "/app/poppler-24.08.0/Library/bin"
+os.environ["PATH"] += os.pathsep + poppler_path
+
+# Verify if Poppler tools are accessible
+@app.route('/extract-text', methods=['GET'])
+def check_poppler():
+    try:
+        result = subprocess.run(["which", "pdftotext"], capture_output=True, text=True)
+        print("pdftotext path:", result.stdout.strip())
+
+        result = subprocess.run(["which", "pdftoppm"], capture_output=True, text=True)
+        print("pdftoppm path:", result.stdout.strip())
+
+    except Exception as e:
+        print("Error checking poppler-utils:", e)
+
+def poppler():
+    check_poppler()
+
 # else:  # Linux (Render)
 #     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 #     poppler_path = None  # No need to specify for Linux
