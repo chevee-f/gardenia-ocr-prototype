@@ -14,7 +14,7 @@ CORS(app)
 
 # Detect OS and set paths
 # if os.name == "nt":  # Windows
-pytesseract.pytesseract.tesseract_cmd = r"/app/Tesseract-OCR/tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = "/app/Tesseract-OCR/tesseract.exe"
 # poppler_path = r"\app\poppler-24.08.0\Library\bin"
 
 # Add poppler to PATH
@@ -41,6 +41,19 @@ def poppler():
     result = check_poppler()
     return jsonify(result)  # ✅ Return a JSON response
 
+@app.route('/tesseract', methods=['GET'])
+def poppler():
+    print("checking tessseract")
+    result = check_tesseract()
+    return result  # ✅ Return a JSON response
+
+def check_tesseract():
+    try:
+        result = subprocess.run(["/app/Tesseract-OCR/tesseract.exe", "--version"], capture_output=True, text=True)
+        print(result.stdout.strip())
+        return result.stdout.strip()
+    except Exception as e:
+        return {"error running tesseract": str(e)}
 # else:  # Linux (Render)
 #     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 #     poppler_path = None  # No need to specify for Linux
