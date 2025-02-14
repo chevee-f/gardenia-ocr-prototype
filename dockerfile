@@ -25,5 +25,7 @@ EXPOSE 5000
 
 RUN ls -l /app && echo "Current Directory:" && pwd
 
+RUN dpkg -l | grep poppler-utils && which pdftotext && which pdftoppm
+
 # Define the command to run your app (modify based on your entry point)
 CMD ["python", "ocr-api.py"]
