@@ -27,5 +27,10 @@ RUN ls -l /app && echo "Current Directory:" && pwd
 
 RUN dpkg -l | grep poppler-utils && which pdftotext && which pdftoppm
 
+ls -l /app/poppler-24.08.0/Library/bin
+
+/app/poppler-24.08.0/Library/bin/pdftotext -v
+
+ENV PATH="/app/poppler-24.08.0/Library/bin:${PATH}"
 # Define the command to run your app (modify based on your entry point)
 CMD ["python", "-u", "ocr-api.py"]

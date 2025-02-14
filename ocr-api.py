@@ -63,7 +63,13 @@ def extract_text_from_pdf(pdf_path, crop_region):
     print("/app/poppler-24.08.0/Library/bin")
     print(r"/app/poppler-24.08.0/Library/bin")
     print("Updated PATH:", os.environ["PATH"])
-    images = convert_from_path(pdf_path, dpi=300, poppler_path=r"/app/poppler-24.08.0/Library/bin")
+    # images = convert_from_path(pdf_path, dpi=300, poppler_path="/app/poppler-24.08.0/Library/bin")
+    images = convert_from_path(
+        pdf_path, 
+        dpi=300, 
+        poppler_path="/app/poppler-24.08.0/Library/bin"
+    )
+
     print("i have the IMAGE now")
     extracted_text = ""
     for image in images:
