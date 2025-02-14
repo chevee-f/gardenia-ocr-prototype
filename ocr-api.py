@@ -22,7 +22,6 @@ poppler_path = "/app/poppler-24.08.0/Library/bin"
 os.environ["PATH"] += os.pathsep + poppler_path
 
 # Verify if Poppler tools are accessible
-@app.route('/extract-text', methods=['GET'])
 def check_poppler():
     try:
         result = subprocess.run(["which", "pdftotext"], capture_output=True, text=True)
@@ -34,6 +33,7 @@ def check_poppler():
     except Exception as e:
         print("Error checking poppler-utils:", e)
 
+@app.route('/poppler', methods=['GET'])
 def poppler():
     check_poppler()
 
