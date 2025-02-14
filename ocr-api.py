@@ -24,18 +24,21 @@ os.environ["PATH"] += os.pathsep + poppler_path
 # Verify if Poppler tools are accessible
 def check_poppler():
     try:
-        result = subprocess.run(["which", "pdftotext"], capture_output=True, text=True)
-        print("pdftotext path:", result.stdout.strip())
+        result_pdftotext = subprocess.run(["which", "pdftotext"], capture_output=True, text=True)
+        result_pdftoppm = subprocess.run(["which", "pdftoppm"], capture_output=True, text=True)
 
-        result = subprocess.run(["which", "pdftoppm"], capture_output=True, text=True)
-        print("pdftoppm path:", result.stdout.strip())
+        return {
+            "pdftotext_path": result_pdftotext.stdout.strip(),
+            "pdftoppm_path": result_pdftoppm.stdout.strip()
+        }
 
     except Exception as e:
-        print("Error checking poppler-utils:", e)
+        return {"error": str(e)}
 
 @app.route('/poppler', methods=['GET'])
 def poppler():
-    check_poppler()
+    result = check_poppler()
+    return jsonify(result)  # ✅ Return a JSON response
 
 # else:  # Linux (Render)
 #     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
