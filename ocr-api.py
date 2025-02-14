@@ -14,7 +14,7 @@ CORS(app)
 # Detect OS and set paths
 # if os.name == "nt":  # Windows
 pytesseract.pytesseract.tesseract_cmd = r".\Tesseract-OCR\tesseract.exe"
-poppler_path = r".\poppler-24.08.0\Library\bin"
+poppler_path = r"/opt/render/project/src/poppler-24.08.0/Library/bin"
 # else:  # Linux (Render)
 #     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 #     poppler_path = None  # No need to specify for Linux
