@@ -37,6 +37,7 @@ def check_poppler():
 
 @app.route('/poppler', methods=['GET'])
 def poppler():
+    print("checking poppler")
     result = check_poppler()
     return jsonify(result)  # ✅ Return a JSON response
 
@@ -73,6 +74,7 @@ def extract_text_from_pdf(pdf_path, crop_region):
 
 @app.route('/extract-text', methods=['POST'])
 def extract_text():
+    print("checking extracted")
     try:
         print( "im here")
         file = request.files['pdf']
@@ -97,6 +99,7 @@ def extract_text():
 
 @app.route('/get-cropped-image', methods=['GET'])
 def get_cropped_image():
+    print("checking cropped image")
     try:
         file_path = "cropped-img.png"  # Path to the cropped image
         return send_file(file_path, mimetype='image/png')
