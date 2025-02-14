@@ -32,5 +32,8 @@ RUN ls -l /app/poppler-24.08.0/Library/bin
 # RUN /app/poppler-24.08.0/Library/bin/pdftotext -v
 
 ENV PATH="/app/poppler-24.08.0/Library/bin:${PATH}"
+
+RUN chmod +x /app/Tesseract-OCR/tesseract.exe
+
 # Define the command to run your app (modify based on your entry point)
 CMD ["python", "-u", "ocr-api.py"]
