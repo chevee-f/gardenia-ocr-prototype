@@ -1,17 +1,27 @@
-FROM python:3.10
+FROM python:3.9-slim
 
-# Install dependencies
-RUN apt update && apt install -y tesseract-ocr poppler-utils
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PATH="$PATH:/opt/render/project/src/poppler-24.08.0/Library/bin"
 
-# Set up working directory
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    libtesseract-dev \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory in the container
 WORKDIR /app
-
-# Install Python packages
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
 # Copy project files
 COPY . .
 
-# Run the app
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]
+# Install Python dependencies
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Expose port (if using a web API)
+EXPOSE 5000
+
+# Define the command to run your app (modify based on your entry point)
+CMD ["python", "ocr-api.py"]
