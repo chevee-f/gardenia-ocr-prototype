@@ -1,7 +1,7 @@
 FROM python:3.9-slim
 
 # Set environment variables
-# ENV PYTHONUNBUFFERED=1 \
+ENV PYTHONUNBUFFERED=1
     # PATH="$PATH:/app/poppler-24.08.0/Library/bin"
 
 # Install system dependencies
@@ -28,4 +28,4 @@ RUN ls -l /app && echo "Current Directory:" && pwd
 RUN dpkg -l | grep poppler-utils && which pdftotext && which pdftoppm
 
 # Define the command to run your app (modify based on your entry point)
-CMD ["python", "ocr-api.py"]
+CMD ["python", "-u", "ocr-api.py"]
