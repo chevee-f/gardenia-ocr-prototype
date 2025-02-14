@@ -42,7 +42,7 @@ def poppler():
     return jsonify(result)  # ✅ Return a JSON response
 
 @app.route('/tesseract', methods=['GET'])
-def poppler():
+def tesseract():
     print("checking tessseract")
     result = check_tesseract()
     return result  # ✅ Return a JSON response
