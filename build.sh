@@ -21,5 +21,9 @@ echo "--echoing path END--"
 
 ls
 
+echo "--------------------"
+
+pwd 
+
 # Install Python dependencies
 pip install -r requirements.txt
