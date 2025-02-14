@@ -12,12 +12,12 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 CORS(app)
 
 # Detect OS and set paths
-if os.name == "nt":  # Windows
-    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
-else:  # Linux (Render)
-    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-    poppler_path = None  # No need to specify for Linux
+# if os.name == "nt":  # Windows
+pytesseract.pytesseract.tesseract_cmd = r".\Tesseract-OCR\tesseract.exe"
+poppler_path = r".\poppler-24.08.0\Library\bin"
+# else:  # Linux (Render)
+#     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+#     poppler_path = None  # No need to specify for Linux
 
 def preprocess_image(image):
     image = image.convert("L")
@@ -33,6 +33,7 @@ def crop_image(image, crop_region):
 
 def extract_text_from_pdf(pdf_path, crop_region):
     # poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    print(poppler_path)
     images = convert_from_path(pdf_path, dpi=300, poppler_path=poppler_path)
     
     extracted_text = ""
