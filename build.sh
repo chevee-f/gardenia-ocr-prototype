@@ -2,7 +2,7 @@
 pip install --upgrade pip
 
 # Install system dependencies
-sudo apt-get update && sudo apt-get install -y \
+apt-get update && apt-get install -y \
     tesseract-ocr \
     libtesseract-dev \
     poppler-utils
