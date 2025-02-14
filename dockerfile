@@ -23,5 +23,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Expose port (if using a web API)
 EXPOSE 5000
 
+RUN ls -l /app && echo "Current Directory:" && pwd
+
 # Define the command to run your app (modify based on your entry point)
 CMD ["python", "ocr-api.py"]
