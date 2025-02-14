@@ -19,5 +19,7 @@ echo "--echoing path START--"
 echo $PATH
 echo "--echoing path END--"
 
+ls
+
 # Install Python dependencies
 pip install -r requirements.txt
