@@ -9,6 +9,7 @@ import subprocess
 import psycopg2
 from psycopg2 import Binary
 from io import BytesIO
+from mimetypes import guess_type
 
 
 app = Flask(__name__)
@@ -24,7 +25,7 @@ if os.name == "nt":  # Windows
 
 os.environ["PATH"] += os.pathsep + poppler_path
 
-DATABASE_URL = "postgresql://ervy_brokerage_01_user:8ILt7kIDINhGuJcY7kD0ERDz99ekrrnh@dpg-cvocv8emcj7s73820q00-a.oregon-postgres.render.com/ervy_brokerage_01"
+DATABASE_URL = "postgresql://ervy_brokerage_02_user:8Ni6rDYyFWfNRzEA6zq3N4xGm2wf8UAh@dpg-d0ctkhemcj7s73av1ifg-a.oregon-postgres.render.com/ervy_brokerage_02"
 
 # Function to connect to PostgreSQL
 def get_db_connection():
@@ -129,6 +130,25 @@ def save_dsc_info():
 
 @app.route('/save-dsc', methods=['POST'])
 def save_dsc():
+    
+    # CREATE TABLE dsc (
+    # id SERIAL PRIMARY KEY,
+    # dsc_no VARCHAR(100) UNIQUE NOT NULL,
+    # vsm VARCHAR(100),
+    # area VARCHAR(100),
+    # file BYTEA,
+    # file_name VARCHAR(255),
+    # created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    # );
+
+    # CREATE TABLE sub_dsc_files (
+    # id SERIAL PRIMARY KEY,
+    # dsc_id INTEGER NOT NULL,
+    # filename VARCHAR(255),
+    # file_data BYTEA,
+    # FOREIGN KEY (dsc_id) REFERENCES dsc(id) ON DELETE CASCADE
+    # );
+
     dsc_no = request.form.get('dsc_no')
     dsc_vsm = request.form.get('vsm')
     dsc_area = request.form.get('area')
@@ -309,13 +329,25 @@ def get_dsc():
     conn = get_db_connection()
     cursor = conn.cursor()
     
+    # Query to get data from dsc table
     cursor.execute("SELECT id, dsc_no, area, vsm, dsc_date, file_name FROM dsc;")
     dsc = cursor.fetchall()
+
+    # Query to get filenames from sub_dsc_files table
+    cursor.execute("SELECT dsc_id, filename FROM sub_dsc_files;")
+    sub_dsc_files = cursor.fetchall()
     
     cursor.close()
     conn.close()
     
-    print(dsc)
+    # Convert sub_dsc_files list into a dictionary for easy lookup
+    sub_dsc_files_dict = {}
+    for sub_dsc in sub_dsc_files:
+        if sub_dsc[0] not in sub_dsc_files_dict:
+            sub_dsc_files_dict[sub_dsc[0]] = []
+        sub_dsc_files_dict[sub_dsc[0]].append(sub_dsc[1])
+    
+    # Build the response list including filenames from sub_dsc_files
     dsc_list = [{
         "id": row[0], 
         "dsc_no": row[1],
@@ -323,12 +355,18 @@ def get_dsc():
         "dsc_vsm": row[3],
         "dsc_date": row[4],
         "file_name": row[5],
+        "sub_dsc_files": sub_dsc_files_dict.get(row[0], []),  # Add corresponding sub_dsc_files
         "status": "Completed"
     } for row in dsc]
+    
     return dsc_list
 
 @app.route('/get-area', methods=['GET'])
 def get_area():
+    # CREATE TABLE area (
+    # id SERIAL PRIMARY KEY,
+    # name VARCHAR(100) NOT NULL
+    # );
     print ('area list should be here')
     try:
         conn = get_db_connection()
@@ -351,6 +389,10 @@ def get_area():
 
 @app.route('/get-vsm', methods=['GET'])
 def get_vsm():
+    # CREATE TABLE vsm (
+    # id SERIAL PRIMARY KEY,
+    # name VARCHAR(100) NOT NULL
+    # );
     print ('vsm list should be here')
     try:
         conn = get_db_connection()
@@ -378,17 +420,18 @@ def get_vsm():
 @app.route('/get-file', methods=['POST'])
 def get_file():
     data = request.get_json()
-    file_name = data.get('fileName')  # Expecting fileName in the request
+    file_name = data.get('fileName')
+    table = data.get('table')  # Get table name
 
-    if not file_name:
-        return jsonify({'error': 'File name is required'}), 400
+    if not file_name or not table:
+        return jsonify({'error': 'File name and table are required'}), 400
 
-    # Connect to the database and retrieve the file data based on the file_name
+    # Connect to the database and retrieve the file data based on the file_name and table
     conn = get_db_connection()
     cursor = conn.cursor()
-    
+
     try:
-        cursor.execute("SELECT file, file_name FROM dsc WHERE file_name = %s", (file_name,))
+        cursor.execute(f"SELECT file, file_name FROM {table} WHERE file_name = %s", (file_name,))
         result = cursor.fetchone()
 
         if not result:
@@ -397,16 +440,21 @@ def get_file():
         file_data = result[0]
         file_name_from_db = result[1]
 
+        # Determine MIME type
+        mime_type, _ = guess_type(file_name_from_db)
+        if not mime_type:
+            mime_type = 'application/octet-stream'  # Default for binary files
+
         # Close the connection
         cursor.close()
         conn.close()
 
-        # Return the file as a response
+        # Return the file with the correct MIME type
         return send_file(
-            BytesIO(file_data), 
-            as_attachment=True, 
-            download_name=file_name_from_db, 
-            mimetype='application/octet-stream'
+            BytesIO(file_data),
+            as_attachment=True,
+            download_name=file_name_from_db,
+            mimetype=mime_type
         )
 
     except Exception as e:
