@@ -10,6 +10,7 @@ import psycopg2
 from psycopg2 import Binary
 from io import BytesIO
 from mimetypes import guess_type
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -130,28 +131,10 @@ def save_dsc_info():
 
 @app.route('/save-dsc', methods=['POST'])
 def save_dsc():
-    
-    # CREATE TABLE dsc (
-    # id SERIAL PRIMARY KEY,
-    # dsc_no VARCHAR(100) UNIQUE NOT NULL,
-    # vsm VARCHAR(100),
-    # area VARCHAR(100),
-    # file BYTEA,
-    # file_name VARCHAR(255),
-    # created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    # );
-
-    # CREATE TABLE sub_dsc_files (
-    # id SERIAL PRIMARY KEY,
-    # dsc_id INTEGER NOT NULL,
-    # filename VARCHAR(255),
-    # file_data BYTEA,
-    # FOREIGN KEY (dsc_id) REFERENCES dsc(id) ON DELETE CASCADE
-    # );
-
     dsc_no = request.form.get('dsc_no')
     dsc_vsm = request.form.get('vsm')
     dsc_area = request.form.get('area')
+    dsc_date = request.form.get('dsc_date')
 
     file = request.files.get('dsc_file')
     file_data = file.read() if file else None
@@ -160,6 +143,10 @@ def save_dsc():
     sub_files = request.files.getlist('sub_dsc_files')
     if not dsc_no:
         return jsonify({'error': 'dsc_no is required'}), 400
+
+    created_date = datetime.utcnow()
+    modified_date = datetime.utcnow()
+
     conn = get_db_connection()
     cursor = conn.cursor()
     # Check if dsc already exists
@@ -169,8 +156,12 @@ def save_dsc():
     # Insert main DSC with main file
     try:
         cursor.execute(
-            "INSERT INTO dsc (dsc_no, vsm, area, file, file_name) VALUES (%s, %s, %s, %s, %s) RETURNING id",
-            (dsc_no, dsc_vsm, dsc_area, Binary(file_data), file_name)
+            """
+            INSERT INTO dsc (dsc_no, vsm, area, dsc_date, file, file_name, created_date, modified_date)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+            """,
+            (dsc_no, dsc_vsm, dsc_area, dsc_date, Binary(file_data), file_name, created_date, modified_date)
         )
     except Exception as e:
         print("❌ Error during INSERT:", e)
@@ -224,58 +215,66 @@ def save_dsc():
     # finally:
     #     cursor.close()
     #     conn.close()
-    return jsonify({"succ": 'E'})
+    # return jsonify({"succ": 'E'})
     
 @app.route('/update-dsc', methods=['POST'])
 def update_dsc():
     dsc_id = request.args.get('id')
     if not dsc_id:
-        return jsonify({'error': 'ID is required in query string'}), 400
+        return jsonify({'error': 'DSC ID is required'}), 400
 
-    form = request.form
-    dsc_no = form.get('dsc_no')
-    dsc_vsm = form.get('dsc_vsm')
-    dsc_area = form.get('dsc_area')
+    dsc_no = request.form.get('dsc_no')
+    dsc_vsm = request.form.get('vsm')
+    dsc_area = request.form.get('area')
+    dsc_date = request.form.get('dsc_date')
 
-    dsc_file = request.files.get('dsc_file')
+    file = request.files.get('dsc_file')
+    file_data = file.read() if file else None
+    file_name = file.filename if file else None
+
     sub_files = request.files.getlist('sub_dsc_files')
+    modified_date = datetime.utcnow()
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Prepare dynamic fields to update
-    updates = []
-    values = []
+    try:
+        # Update core fields
+        if file_data:
+            cursor.execute("""
+                UPDATE dsc 
+                SET dsc_no=%s, vsm=%s, area=%s, dsc_date=%s,
+                    file=%s, file_name=%s, modified_date=%s
+                WHERE id=%s
+            """, (dsc_no, dsc_vsm, dsc_area, dsc_date, Binary(file_data), file_name, modified_date, dsc_id))
+        else:
+            cursor.execute("""
+                UPDATE dsc 
+                SET dsc_no=%s, vsm=%s, area=%s, dsc_date=%s,
+                    modified_date=%s
+                WHERE id=%s
+            """, (dsc_no, dsc_vsm, dsc_area, dsc_date, modified_date, dsc_id))
 
-    if dsc_no:
-        updates.append("dsc_no = %s")
-        values.append(dsc_no)
-    if dsc_vsm:
-        updates.append("vsm = %s")
-        values.append(dsc_vsm)
-    if dsc_area:
-        updates.append("area = %s")
-        values.append(dsc_area)
-    if dsc_file:
-        updates.append("dsc_file = %s")
-        values.append(Binary(dsc_file.read()))
+        # Optionally clear & re-insert sub_dsc_files
+        if sub_files:
+            cursor.execute("DELETE FROM sub_dsc_files WHERE dsc_id = %s", (dsc_id,))
+            for f in sub_files:
+                cursor.execute(
+                    "INSERT INTO sub_dsc_files (dsc_id, filename, file_data) VALUES (%s, %s, %s)",
+                    (dsc_id, f.filename, Binary(f.read()))
+                )
 
-    if updates:
-        set_clause = ", ".join(updates)
-        values.append(dsc_id)
-        cursor.execute(f"UPDATE dsc SET {set_clause} WHERE id = %s", values)
+        conn.commit()
+        return jsonify({'message': 'DSC updated successfully'}), 200
 
-    # Replace sub_dsc_files if provided
-    if sub_files:
-        cursor.execute("DELETE FROM sub_dsc_files WHERE dsc_id = %s", (dsc_id,))
-        for f in sub_files:
-            cursor.execute(
-                "INSERT INTO sub_dsc_files (dsc_id, filename, file_data) VALUES (%s, %s, %s)",
-                (dsc_id, f.filename, Binary(f.read()))
-            )
+    except Exception as e:
+        conn.rollback()
+        print("❌ Error during update:", e)
+        return jsonify({'error': str(e)}), 500
 
-    conn.commit()
-    return jsonify({'message': 'DSC updated successfully'}), 200
+    finally:
+        cursor.close()
+        conn.close()
 
 @app.route('/get-pdf', methods=['GET'])
 def get_pdf():
@@ -430,8 +429,17 @@ def get_file():
     conn = get_db_connection()
     cursor = conn.cursor()
 
+    if table == "dsc":
+        file_column = "file"
+        name_column = "file_name"
+    elif table == "sub_dsc_files":
+        file_column = "file_data"
+        name_column = "filename"
+    else:
+        return jsonify({'error': 'Invalid table'}), 400
+        
     try:
-        cursor.execute(f"SELECT file, file_name FROM {table} WHERE file_name = %s", (file_name,))
+        cursor.execute(f"SELECT {file_column}, {name_column} FROM {table} WHERE {name_column} = %s", (file_name,))
         result = cursor.fetchone()
 
         if not result:
