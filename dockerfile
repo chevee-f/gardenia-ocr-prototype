@@ -37,4 +37,4 @@ RUN chmod +x /app/Tesseract-OCR/tesseract.exe
 RUN ls -l /app/Tesseract-OCR/tesseract.exe
 
 # Define the command to run your app (modify based on your entry point)
-CMD ["python", "-u", "ocr-api.py"]
+CMD ["python", "-u", "server.py"]

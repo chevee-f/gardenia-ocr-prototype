@@ -1,0 +1,47 @@
+
+    
+    CREATE TABLE dsc (
+    id SERIAL PRIMARY KEY,
+    dsc_no VARCHAR(100) UNIQUE NOT NULL,
+    vsm VARCHAR(100),
+    area VARCHAR(100),
+    file BYTEA,
+    file_name VARCHAR(255),
+    dsc_date DATE,
+    created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    modified_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE sub_dsc_files (
+    id SERIAL PRIMARY KEY,
+    dsc_id INTEGER NOT NULL,
+    filename VARCHAR(255),
+    file_data BYTEA,
+    FOREIGN KEY (dsc_id) REFERENCES dsc(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE area (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE vsm (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+    );
+
+    CREATE TABLE dr (
+    id SERIAL PRIMARY KEY,
+    ref_no VARCHAR(20) NOT NULL,           -- 101057025
+    group_ref_no VARCHAR(20),              -- 30642
+    drsi_date DATE,                        -- 02.28.2025
+    name_of_dealer VARCHAR(255),
+    contact_person VARCHAR(100),
+    contact_no VARCHAR(50),
+    address TEXT,
+    declared_amount NUMERIC(12, 2),
+    no_of_boxes INTEGER,
+    no_of_bundles INTEGER,
+    dispatched_by VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
